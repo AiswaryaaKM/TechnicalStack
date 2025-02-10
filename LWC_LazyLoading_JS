@@ -1,0 +1,47 @@
+import {LightningElement, track, wire} from 'lwc';
+import getRates from '@salesforce/apex/LazyLoadingController.getRates';
+
+const columns = [
+    { label: 'Id', fieldName: 'Id' type: 'text'},
+    { label: 'Name', fieldName: 'Name' type: 'text'},
+    { label: 'Rating', fieldName: 'Rating' type: 'text'}
+];
+
+export default class LayLoadingCMp extends LightningElement {
+
+    accounts=[];
+    error;
+    columns = columns;
+    rowLimit = 25;
+    rowOffset=0;
+
+    connectedCallback(){
+        this.loadData();
+    }
+
+    loadData(){
+        return getRates({limitSize: this.rowLimit, offset: this.rowOffset})
+        .then(result =>{
+            let updatedRecords = [...this.accounts, ...result];
+            this.accounts = updatedRecords;
+            this.error = undefined;
+        
+        })
+        .catch(error => {
+            this.error = error;
+            this.accounts = undefined;
+        })
+    }
+
+    loadMoreData(event){
+        const currentRecord = this.accounts;
+        const {target} = event;
+        target.isLoading = true;
+
+        this.rowOffset = this.rowOffset + this.rowLimit;
+        this.loadData()
+            .then(() =>{
+                target.isLoading = false;
+            })
+    }
+}
