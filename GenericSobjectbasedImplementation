@@ -1,0 +1,47 @@
+public class GenericSobjectbasedImplementation{
+
+    //Returns the set of fields as per the fieldset for an individual object
+    public static getdata(String objAPIName, String fieldSetName){
+      FieldSetForm form = new FieldSetForm();
+      form.Fields = readFieldSet(fieldSetName, objAPIName);
+      return form;
+    }
+
+  //Retrieves Fields based on fieldSetName and Oject Name
+  public static List<String> readFieldSet(String fieldSetName, String ObjectName){
+  //Initializing the variables
+  List<String> Fields = new List<String>();
+  Map<String, Schema.SObjectType> GlobalDescribeMap = new Map<String, Schema.SObjectType>();
+  Schema.SobjectType SobjectTypeObj;
+  Schema.DescribeSObjectResult DescribeSobjectResultObj;
+  Schema.FieldSet fieldsetObj;
+
+  //Assing values to the variables
+  GlobalDescribeMap = Schema.getGlobalDescribe();
+  SObjectTypeObj = GlobalDescribeMap.get(ObjectName);
+  DescribeSobjectResultObj = SObjectTypeObj.getDescribe();
+  fieldSetObj = DescribeSObjectResultObj.FieldSets.getMap().get(fieldSetName);
+
+  List<Schema.FieldSetMember> fieldsetMemberList = new List<Schema.FieldSetMember>();
+  fieldSetMemberList = fieldSetObj.getFields();
+  for(Schema.FieldSetMember fieldSetMemberObj: fieldsetMemberList){
+    fields.add(fieldSetMemberObj.getFieldPath());
+  }
+  return fields;
+  }
+
+  //Dynamic soql
+  public static SObject getFieldData(String ojectApiName, String recordId, List<String> Fields){
+    try{
+        String soql, sObjectSelfLookup;
+        SObject existingRecord;
+        if(Fields.size()! = 0){
+          soql = 'Select id', +String.join(Fields,',')+' from '+objectApiName+' where Id = \'' +recordId + '\'';
+          existingRecord = database.query(soql).size() > 0? Database.query(soql): null;
+        }
+    return existingRecord;
+    }catch(Exception e){
+        throw new AuraHandledException(e.getMessage()));
+    }
+  }
+}
